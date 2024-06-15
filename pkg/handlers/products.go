@@ -5,6 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/database"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/models"
+	"github.com/reeversedev2/zalanda-warehouse-service/pkg/pagination"
+	"github.com/reeversedev2/zalanda-warehouse-service/pkg/utils"
 )
 
 func ListProductById(c *fiber.Ctx) error {
@@ -24,7 +26,12 @@ func ListProductById(c *fiber.Ctx) error {
 
 func ListProducts(c *fiber.Ctx) error {
 	products := []models.Product{}
-	database.DB.Db.Find(&products)
+
+	database.DB.Db.Scopes(utils.Paginate(products, &pagination.Pagination{
+		Limit: c.QueryInt("limit", 10),
+		Page:  c.QueryInt("page", 1),
+		Sort:  c.Query("sort", "id desc"),
+	}, database.DB.Db)).Find(&products)
 
 	return c.Status(200).JSON(products)
 }
