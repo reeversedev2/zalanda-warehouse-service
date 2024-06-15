@@ -14,4 +14,7 @@ func setupRoutes(app *fiber.App) {
 	app.Get("/products", handlers.ListProducts)
 	app.Post("/product", handlers.CreateProduct)
 	app.Patch("/product/:productId", handlers.UpdateProduct)
+
+	// Batch products
+	app.Post("/batch-products", handlers.CreateBatchProducts)
 }

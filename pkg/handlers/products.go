@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gofiber/fiber/v2"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/database"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/models"
@@ -39,6 +40,26 @@ func CreateProduct(c *fiber.Ctx) error {
 	database.DB.Db.Create(&product)
 
 	return c.Status(200).JSON(product)
+}
+
+// Creates fake products for testing and initial seeding
+func CreateBatchProducts(c *fiber.Ctx) error {
+	for i := 0; i < 1000; i++ {
+		database.DB.Db.Create(&models.Product{
+			Name:     gofakeit.ProductName(),
+			Company:  gofakeit.Company(),
+			Price:    gofakeit.Price(100, 1000),
+			Category: gofakeit.RandomString([]string{"Electronics", "Clothing", "Food", "Furniture", "Books"}),
+			Expire:   gofakeit.Date().String(),
+			Status:   gofakeit.RandomString([]string{"NEW", "RETURNED", "DAMAGED", "REFURBISHED"}),
+			Image:    gofakeit.URL(),
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Batch products created",
+	})
+
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
