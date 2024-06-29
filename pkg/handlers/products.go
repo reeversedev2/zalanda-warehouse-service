@@ -45,7 +45,7 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 
 	var company models.Company
-	err := findCompanyById(product.CompanyID, &company)
+	err := FindCompanyById(product.CompanyID, &company)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": err.Error(),

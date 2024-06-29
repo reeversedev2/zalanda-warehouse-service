@@ -19,7 +19,7 @@ func CreateCompany(c *fiber.Ctx) error {
 		})
 	}
 
-	err := findCompanyByName(company.Name, &models.Company{})
+	err := FindCompanyByName(company.Name, &models.Company{})
 	if err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"message": err.Error(),
@@ -42,7 +42,7 @@ func ListCompanies(c *fiber.Ctx) error {
 	return c.Status(200).JSON(companies)
 }
 
-func findCompanyById(id int, company *models.Company) error {
+func FindCompanyById(id int, company *models.Company) error {
 	database.DB.Db.Find(&company, "id = ?", id)
 	if company.ID == 0 {
 		return errors.New("company does not exist")
@@ -50,7 +50,7 @@ func findCompanyById(id int, company *models.Company) error {
 	return nil
 }
 
-func findCompanyByName(name string, company *models.Company) error {
+func FindCompanyByName(name string, company *models.Company) error {
 	database.DB.Db.Find(&company, "name = ?", name)
 	if company.ID != 0 {
 		error := fmt.Sprintf("company exists already with name %v", name)
