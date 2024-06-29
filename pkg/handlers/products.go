@@ -44,6 +44,14 @@ func CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
+	var company models.Company
+	err := findCompanyById(product.CompanyID, &company)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	database.DB.Db.Create(&product)
 
 	return c.Status(200).JSON(product)
@@ -54,7 +62,6 @@ func CreateBatchProducts(c *fiber.Ctx) error {
 	for i := 0; i < 1000; i++ {
 		database.DB.Db.Create(&models.Product{
 			Name:     gofakeit.ProductName(),
-			Company:  gofakeit.Company(),
 			Price:    gofakeit.Price(100, 1000),
 			Category: gofakeit.RandomString([]string{"Electronics", "Clothing", "Food", "Furniture", "Books"}),
 			Expire:   gofakeit.Date().String(),
