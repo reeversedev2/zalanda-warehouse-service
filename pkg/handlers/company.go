@@ -42,12 +42,12 @@ func ListCompanies(c *fiber.Ctx) error {
 	return c.Status(200).JSON(companies)
 }
 
-func FindCompanyById(id int, company *models.Company) error {
+func FindCompanyById(id int, company *models.Company) (*models.Company, error) {
 	database.DB.Db.Find(&company, "id = ?", id)
 	if company.ID == 0 {
-		return errors.New("company does not exist")
+		return nil, errors.New("company does not exist")
 	}
-	return nil
+	return company, nil
 }
 
 func FindCompanyByName(name string, company *models.Company) error {

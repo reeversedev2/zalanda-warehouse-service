@@ -65,7 +65,7 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 
 	var company models.Company
-	companyErr := FindCompanyById(product.CompanyID, &company)
+	foundCompany, companyErr := FindCompanyById(product.CompanyID, &company)
 	if companyErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": companyErr.Error(),
@@ -73,6 +73,9 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 
 	database.DB.Db.Create(&product)
+
+	// product's company field will have company info
+	product.Company = *foundCompany
 
 	return c.Status(200).JSON(product)
 }
