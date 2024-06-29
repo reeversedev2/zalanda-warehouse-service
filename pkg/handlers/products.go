@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gofiber/fiber/v2"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/database"
@@ -8,6 +11,15 @@ import (
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/pagination"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/utils"
 )
+
+func FindProductByName(productName string, product *models.Product) error {
+	database.DB.Db.Find(&product, "name = ?", productName)
+	if product.ID != 0 {
+		error := fmt.Sprintf("%v already exists", productName)
+		return errors.New(error)
+	}
+	return nil
+}
 
 func ListProductById(c *fiber.Ctx) error {
 	productId := c.Params("productId")
@@ -44,11 +56,19 @@ func CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
+	var productModal models.Product
+	productExistsErr := FindProductByName(product.Name, &productModal)
+	if productExistsErr != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": productExistsErr.Error(),
+		})
+	}
+
 	var company models.Company
-	err := FindCompanyById(product.CompanyID, &company)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"message": err.Error(),
+	companyErr := FindCompanyById(product.CompanyID, &company)
+	if companyErr != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": companyErr.Error(),
 		})
 	}
 
