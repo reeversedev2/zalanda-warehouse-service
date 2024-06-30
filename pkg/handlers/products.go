@@ -12,6 +12,7 @@ import (
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/utils"
 )
 
+// Search Product by Product name
 func FindProductByName(productName string, product *models.Product) error {
 	database.DB.Db.Find(&product, "name = ?", productName)
 	if product.ID != 0 {
@@ -21,6 +22,7 @@ func FindProductByName(productName string, product *models.Product) error {
 	return nil
 }
 
+// Search Product by Product ID
 func ListProductById(c *fiber.Ctx) error {
 	productId := c.Params("productId")
 	product := models.Product{}
@@ -36,6 +38,7 @@ func ListProductById(c *fiber.Ctx) error {
 	return c.Status(200).JSON(product)
 }
 
+// List all products
 func ListProducts(c *fiber.Ctx) error {
 	products := []models.Product{}
 
@@ -48,6 +51,7 @@ func ListProducts(c *fiber.Ctx) error {
 	return c.Status(200).JSON(products)
 }
 
+// Create a new Product
 func CreateProduct(c *fiber.Ctx) error {
 	product := new(models.Product)
 	if err := c.BodyParser(product); err != nil {
@@ -99,6 +103,7 @@ func CreateBatchProducts(c *fiber.Ctx) error {
 
 }
 
+// Update existing Product
 func UpdateProduct(c *fiber.Ctx) error {
 	product := new(models.Product)
 	productId := c.Params("productId")

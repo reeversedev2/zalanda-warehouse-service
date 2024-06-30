@@ -11,6 +11,7 @@ import (
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/utils"
 )
 
+// Create a new company
 func CreateCompany(c *fiber.Ctx) error {
 	company := new(models.Company)
 	if err := c.BodyParser(company); err != nil {
@@ -30,6 +31,7 @@ func CreateCompany(c *fiber.Ctx) error {
 	return c.Status(200).JSON(company)
 }
 
+// Show all companies
 func ListCompanies(c *fiber.Ctx) error {
 	companies := []models.Company{}
 
@@ -42,6 +44,7 @@ func ListCompanies(c *fiber.Ctx) error {
 	return c.Status(200).JSON(companies)
 }
 
+// Search company by Company ID
 func FindCompanyById(id int, company *models.Company) (*models.Company, error) {
 	database.DB.Db.Find(&company, "id = ?", id)
 	if company.ID == 0 {
@@ -50,6 +53,7 @@ func FindCompanyById(id int, company *models.Company) (*models.Company, error) {
 	return company, nil
 }
 
+// Search Company by Company Name
 func FindCompanyByName(name string, company *models.Company) error {
 	database.DB.Db.Find(&company, "name = ?", name)
 	if company.ID != 0 {
