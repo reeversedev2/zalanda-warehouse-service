@@ -10,16 +10,16 @@ func setupRoutes(app *fiber.App) {
 	app.Get("/", handlers.Index)
 
 	// Products
-	app.Get("/product/:productId", handlers.ListProductById)
-	app.Get("/products", handlers.ListProducts)
-	app.Post("/product", handlers.CreateProduct)
-	app.Patch("/product/:productId", handlers.UpdateProduct)
+	app.Get("/api/product/:productId", handlers.ListProductById)
+	app.Get("/api/products", handlers.ListProducts)
+	app.Post("/api/product", handlers.CreateProduct)
+	app.Patch("/api/product/:productId", handlers.UpdateProduct)
 
 	// Batch products
 	app.Post("/batch-products", handlers.CreateBatchProducts)
 
 	// Companies
-	app.Post("/company", handlers.CreateCompany)
-	app.Get("/companies", handlers.ListCompanies)
-	app.Patch("/company/:companyId", handlers.UpdateCompany)
+	app.Post("/api/company", handlers.CreateCompany)
+	app.Get("/api/companies", handlers.ListCompanies)
+	app.Patch("/api/company/:companyId", handlers.UpdateCompany)
 }
