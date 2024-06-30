@@ -44,6 +44,22 @@ func ListCompanies(c *fiber.Ctx) error {
 	return c.Status(200).JSON(companies)
 }
 
+// Update the existing company
+func UpdateCompany(c *fiber.Ctx) error {
+	company := new(models.Company)
+	companyId := c.Params("companyId")
+
+	if err := c.BodyParser(company); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	database.DB.Db.Where("id=?", companyId).Updates(&company)
+
+	return c.Status(fiber.StatusAccepted).JSON(company)
+}
+
 // Search company by Company ID
 func FindCompanyById(id int, company *models.Company) (*models.Company, error) {
 	database.DB.Db.Find(&company, "id = ?", id)

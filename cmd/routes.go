@@ -21,4 +21,5 @@ func setupRoutes(app *fiber.App) {
 	// Companies
 	app.Post("/company", handlers.CreateCompany)
 	app.Get("/companies", handlers.ListCompanies)
+	app.Patch("/company/:companyId", handlers.UpdateCompany)
 }
