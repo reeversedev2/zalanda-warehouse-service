@@ -57,7 +57,7 @@ func UpdateCompany(c *fiber.Ctx) error {
 
 	database.DB.Db.Where("id=?", companyId).Updates(&company)
 
-	return c.Status(fiber.StatusAccepted).JSON(company)
+	return c.Status(fiber.StatusOK).JSON(company)
 }
 
 // Search company by Company ID
