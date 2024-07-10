@@ -28,7 +28,7 @@ func CreateCompany(c *fiber.Ctx) error {
 	}
 
 	database.DB.Db.Create(&company)
-	return c.Status(200).JSON(company)
+	return c.Status(fiber.StatusOK).JSON(company)
 }
 
 // Show all companies
