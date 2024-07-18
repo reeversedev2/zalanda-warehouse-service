@@ -45,7 +45,8 @@ func ListProducts(c *fiber.Ctx) error {
 	database.DB.Db.Scopes(utils.Paginate(products, &pagination.Pagination{
 		Limit: c.QueryInt("limit", 10),
 		Page:  c.QueryInt("page", 1),
-		Sort:  c.Query("sort", "id desc"),
+		// get sort value from the URL params
+		Sort: c.Query("sort", fmt.Sprintf("id %s", c.Query("sort_by"))),
 	}, database.DB.Db)).Find(&products)
 
 	return c.Status(200).JSON(products)
