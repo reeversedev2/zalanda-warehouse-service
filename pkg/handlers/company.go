@@ -28,6 +28,23 @@ func CreateCompany(c *fiber.Ctx) error {
 	}
 
 	database.DB.Db.Create(&company)
+
+	// message := amqp091.Publishing{
+	// 	ContentType: "text/plain",
+	// 	Body:        []byte(c.Query("msg")),
+	// }
+
+	// // Attempt to publish a message to the queue.
+	// if err := broker.BrokerCh.Publish(
+	// 	"",              // exchange
+	// 	"QueueService1", // queue name
+	// 	false,           // mandatory
+	// 	false,           // immediate
+	// 	message,         // message to publish
+	// ); err != nil {
+	// 	return err
+	// }
+
 	return c.Status(fiber.StatusOK).JSON(company)
 }
 
