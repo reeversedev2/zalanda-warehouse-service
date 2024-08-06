@@ -1,11 +1,11 @@
-package main
+package router
 
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/handlers"
 )
 
-func setupRoutes(app *fiber.App) {
+func Routes(app *fiber.App) {
 	// Index
 	app.Get("/", handlers.Index)
 

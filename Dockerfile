@@ -1,8 +1,25 @@
-FROM golang:1.22.3
+FROM golang:1.22.3 AS builder
 
-WORKDIR /usr/src/app
+# Move to working directory (/build).
+WORKDIR /build
 
-RUN go install github.com/air-verse/air@latest
+# Copy and download dependency using go mod.
+COPY zalanda-warehouse-service ./
+RUN go mod download
 
-COPY . .
-RUN go mod tidy
+# Copy the code into the container.
+COPY zalanda-warehouse-service/cmd/main.go .
+
+# Set necessary environment variables needed 
+# for our image and build the sender.
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+RUN go build -ldflags="-s -w" -o warehouse .
+
+FROM scratch
+
+# Copy binary and config files from /build 
+# to root folder of scratch container.
+COPY --from=builder ["/build/warehouse", "/"]
+
+# Command to run when starting the container.
+ENTRYPOINT ["/warehouse"]
