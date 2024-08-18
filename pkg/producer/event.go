@@ -14,12 +14,8 @@ func StartConnect() {
 	amqpServerURL := os.Getenv("AMQP_SERVER_URL")
 	fmt.Println("amqpServerURL ", amqpServerURL)
 
-	// Create a new RabbitMQ connection.
-	connectRabbitMQ, err := amqp.Dial(amqpServerURL)
-	if err != nil {
-		// panic(err)
-		fmt.Println("error happened ", err)
-	}
+	connectRabbitMQ := GetRabbitConnection(amqpServerURL)
+
 	defer connectRabbitMQ.Close()
 
 	// Let's start by opening a channel to our RabbitMQ
@@ -44,4 +40,15 @@ func StartConnect() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetRabbitConnection(amqpServerURL string) *amqp.Connection {
+	// Create a new RabbitMQ connection.
+	connectRabbitMQ, err := amqp.Dial(amqpServerURL)
+	if err != nil {
+		// panic(err)
+		fmt.Println("error happened ", err)
+	}
+
+	return connectRabbitMQ
 }

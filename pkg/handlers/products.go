@@ -3,12 +3,16 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gofiber/fiber/v2"
+	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/reeversedev2/zalanda-warehouse-service/pkg/cache"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/database"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/models"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/pagination"
+	"github.com/reeversedev2/zalanda-warehouse-service/pkg/producer"
 	"github.com/reeversedev2/zalanda-warehouse-service/pkg/utils"
 )
 
@@ -119,4 +123,57 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(product)
 
+}
+
+func getChannel() (*amqp.Channel, error) {
+	amqpServerURL := os.Getenv("AMQP_SERVER_URL")
+	connectRabbitMQ := producer.GetRabbitConnection(amqpServerURL)
+
+	channelRabbitMQ, err := connectRabbitMQ.Channel()
+	if err != nil {
+		return nil, err
+	}
+
+	return channelRabbitMQ, nil
+}
+
+func SendMessage(c *fiber.Ctx) error {
+	channelRabbitMQ, err := getChannel()
+	if err != nil {
+		return err
+	}
+
+	message := amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        []byte(c.Query("status")),
+	}
+
+	// Attempt to publish a message to the queue.
+	if err := channelRabbitMQ.Publish(
+		"",                  // exchange
+		"ProductsDashboard", // queue name
+		false,               // mandatory
+		false,               // immediate
+		message,             // message to publish
+	); err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(message)
+
+}
+
+func ReceiveMessage(c *fiber.Ctx) error {
+	redis := cache.NewRedis()
+	status, err := redis.RedisClient.Get("product_status").Result()
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"product_status": status,
+	})
 }

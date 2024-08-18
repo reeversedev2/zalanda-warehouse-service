@@ -22,4 +22,8 @@ func Routes(app *fiber.App) {
 	app.Post("/api/company", handlers.CreateCompany)
 	app.Get("/api/companies", handlers.ListCompanies)
 	app.Put("/api/company/:companyId", handlers.UpdateCompany)
+
+	app.Get("/message/send", handlers.SendMessage)
+	// Get status from Redis
+	app.Get("/product/status", handlers.ReceiveMessage)
 }
