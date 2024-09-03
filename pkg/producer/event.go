@@ -52,3 +52,15 @@ func GetRabbitConnection(amqpServerURL string) *amqp.Connection {
 
 	return connectRabbitMQ
 }
+
+func GetChannel() (*amqp.Channel, error) {
+	amqpServerURL := os.Getenv("AMQP_SERVER_URL")
+	connectRabbitMQ := GetRabbitConnection(amqpServerURL)
+
+	channelRabbitMQ, err := connectRabbitMQ.Channel()
+	if err != nil {
+		return nil, err
+	}
+
+	return channelRabbitMQ, nil
+}

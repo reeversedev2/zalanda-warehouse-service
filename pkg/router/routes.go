@@ -15,6 +15,10 @@ func Routes(app *fiber.App) {
 	app.Post("/api/product", handlers.CreateProduct)
 	app.Patch("/api/product/:productId", handlers.UpdateProduct)
 
+	// Analytics
+	// Product Status Analytics
+	app.Get("/api/analytics/product/status", handlers.GetProductStatusEvents)
+
 	// Batch products
 	app.Post("/batch-products", handlers.CreateBatchProducts)
 
@@ -23,7 +27,4 @@ func Routes(app *fiber.App) {
 	app.Get("/api/companies", handlers.ListCompanies)
 	app.Put("/api/company/:companyId", handlers.UpdateCompany)
 
-	app.Get("/message/send", handlers.SendMessage)
-	// Get status from Redis
-	app.Get("/product/status", handlers.ReceiveMessage)
 }
