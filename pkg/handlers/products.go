@@ -112,12 +112,22 @@ func UpdateProduct(c *fiber.Ctx) error {
 	product := new(models.Product)
 	productId := c.Params("productId")
 
+	// find product if it exists
+	foundErr := database.DB.Db.First(&product, productId).Error
+	if foundErr != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Product not found",
+		})
+	}
+
+	// parse the request body
 	if err := c.BodyParser(product); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
+	// update the product
 	result := database.DB.Db.Where("id=?", productId).Updates(&product)
 
 	if result.Error != nil {
@@ -126,6 +136,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 		})
 	}
 
+	// update the product status in Redis via RabbitMQ
 	err := UpdateAnalytics(utils.Message{
 		"product": fmt.Sprintf("%s:%s", productId, product.Status),
 	})
@@ -137,7 +148,6 @@ func UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(product)
-
 }
 
 // Update product status in Redis via RabbitMQ
@@ -172,7 +182,14 @@ func UpdateAnalytics(msg utils.Message) error {
 
 func GetProductStatusEvents(c *fiber.Ctx) error {
 	redis := cache.NewRedis()
-	status, err := redis.RedisClient.LRange("product_status:packed", 0, -1).Result()
+	packed, err := redis.RedisClient.LRange("product_status:packed", 0, -1).Result()
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	new, err := redis.RedisClient.LRange("product_status:new", 0, -1).Result()
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -180,7 +197,9 @@ func GetProductStatusEvents(c *fiber.Ctx) error {
 		})
 	}
 
+	// return the arrays of packed and new products with their product IDs
 	return c.Status(200).JSON(fiber.Map{
-		"packed": status,
+		"packed": packed,
+		"new":    new,
 	})
 }
