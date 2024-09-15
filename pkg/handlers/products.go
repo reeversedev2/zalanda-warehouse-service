@@ -118,7 +118,13 @@ func UpdateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	database.DB.Db.Where("id=?", productId).Updates(&product)
+	result := database.DB.Db.Where("id=?", productId).Updates(&product)
+
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": result.Error.Error(),
+		})
+	}
 
 	err := UpdateAnalytics(utils.Message{
 		"product": fmt.Sprintf("%s:%s", productId, product.Status),
@@ -166,7 +172,7 @@ func UpdateAnalytics(msg utils.Message) error {
 
 func GetProductStatusEvents(c *fiber.Ctx) error {
 	redis := cache.NewRedis()
-	status, err := redis.RedisClient.LRange("product:status", 0, -1).Result()
+	status, err := redis.RedisClient.LRange("product_status:packed", 0, -1).Result()
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -175,6 +181,6 @@ func GetProductStatusEvents(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"product_status": status,
+		"packed": status,
 	})
 }
