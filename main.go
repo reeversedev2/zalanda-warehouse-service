@@ -13,9 +13,11 @@ func main() {
 	producer.StartConnect()
 
 	app := fiber.New()
+	
+	// Add CORS middleware before routes
+	app.Use(cors.New())
+	
 	router.Routes(app)
 
-	app.Use(cors.New())
-
-	app.Listen(":3000")
+	app.Listen(":8080")
 }

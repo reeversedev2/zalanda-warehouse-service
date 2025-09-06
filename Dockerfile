@@ -1,25 +1,34 @@
-FROM golang:1.22.5 AS builder
+FROM golang:1.23 AS builder
 
-# Move to working directory (/build).
-WORKDIR /build
+# Set working directory
+WORKDIR /app
 
-# Copy and download dependency using go mod.
-COPY zalanda-warehouse-service ./
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
-# Copy the code into the container.
-COPY zalanda-warehouse-service/cmd/main.go .
+# Copy source code
+COPY . .
 
-# Set necessary environment variables needed 
-# for our image and build the sender.
+# Build the application
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags="-s -w" -o warehouse .
+RUN go build -ldflags="-s -w" -o warehouse ./main.go
 
-FROM scratch
+# Final stage
+FROM alpine:latest
 
-# Copy binary and config files from /build 
-# to root folder of scratch container.
-COPY --from=builder ["/build/warehouse", "/"]
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
 
-# Command to run when starting the container.
-ENTRYPOINT ["/warehouse"]
+WORKDIR /root/
+
+# Copy the binary from builder stage
+COPY --from=builder /app/warehouse .
+
+# Expose port
+EXPOSE 8080
+
+# Command to run
+CMD ["./warehouse"]
